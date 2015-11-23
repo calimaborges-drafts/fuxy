@@ -34,9 +34,9 @@ module.exports = function(serverHost, serverPort, port) {
                     if (err) {
                         socket.end('ERROR: Proxy failed');
                     }
-                    var response = res.text;
-                    console.log(response);
-                    socket.write(response.content.toString('ascii'));
+                    var response = JSON.parse(res.text);        
+                    console.log(new Buffer(info.content, 'base64').toString('ascii'));
+                    socket.write(new Buffer(info.content, 'base64').toString('ascii'));
                 });
         });
         socket.on('drain', debugfunc('drain'));
