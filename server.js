@@ -43,7 +43,7 @@ module.exports = function(port) {
                 content: data.toString('base64')
             }
 
-            res.end(JSON.stringify(req.body));
+            res.end(JSON.stringify(message));
         });
     });
 
