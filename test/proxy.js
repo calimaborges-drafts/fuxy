@@ -27,8 +27,20 @@ describe('proxy', function() {
         proxyClient.close();
     });
 
-    it('should redirect request to proxy server', function(done) {
+    it('should redirect HTTP request to proxy server', function(done) {
         request.get("http://test.carlosborg.es/")
+            .proxy("http://" + host + ":" + proxyClientPort)
+            .end(function(err, res) {
+                assert.ifError(err);
+                assert.equal(res.status, status.OK);
+                var result = JSON.parse(res.text);
+                assert.deepEqual( { status: 'active' }, result );
+                done();
+            });
+    });
+
+    it('should redirect HTTPS request to proxy server', function(done) {
+        request.get("https://test.carlosborg.es/")
             .proxy("http://" + host + ":" + proxyClientPort)
             .end(function(err, res) {
                 assert.ifError(err);

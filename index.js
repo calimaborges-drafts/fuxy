@@ -10,14 +10,15 @@ var debugfunc = function(name) {
     };
 };
 
-var urlFromData = function(data) {
+var httpInfoFromString = function(data) {
     var pattern = /(\S+)\s+(\S+)\s+(\S+)/i
-    var info = pattern.exec(data);
-    var method = info[1];
-    var uri = info[2];
-    var httpVersion = info[3];
+    var matches = pattern.exec(data);
 
-    return uri;
+    return {
+        method: matches[1],
+        uri: matches[2],
+        version: matches[3]
+    };
 };
 
 var hostFromUrl = function(uri) {
@@ -48,12 +49,17 @@ module.exports = function(serverHost, serverPort, port) {
             console.log("Connection closed with proxy client");
         });
         socket.on('data', function(data) {
-            var url = urlFromData(data);
+            console.log(data.toString());
+            var httpInfo = httpInfoFromString(data);
+            var uri = httpInfo.uri;
+            if (httpInfo.method == 'CONNECT') {
+                uri = "connect://" + uri;
+            }
 
             var message = {
                 type: 'data',
-                host: hostFromUrl(url),
-                port: portFromUrl(url),
+                host: hostFromUrl(uri),
+                port: portFromUrl(uri),
                 content: data.toString('base64')
             }
 
