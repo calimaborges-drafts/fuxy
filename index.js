@@ -1,7 +1,7 @@
 var net = require("net");
 var request = require('superagent');
 
-var proxyUrl = "http://127.0.0.1:3128";
+var proxyUrl = process.env.http_proxy;
 
 var debugfunc = function(name) {
     return function() {
@@ -23,9 +23,13 @@ module.exports = function(serverHost, serverPort, port) {
                 content: data.toString('base64')
             }
 
-            request.post("http://" + serverHost + ":" + serverPort)
-                .proxy(proxyUrl)
-                .send(message)
+            var req = request.post("http://" + serverHost + ":" + serverPort);
+
+            if (proxyUrl) {
+                req.proxy(proxyUrl);
+            }
+            
+            req.send(message)
                 .end(function(err, res) {
                     if (err) {
                         socket.end('ERROR: Proxy failed');
