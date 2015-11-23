@@ -12,8 +12,8 @@ var debugfunc = function(name) {
 module.exports = function(serverHost, serverPort, port) {
     var server = net.createServer( function(socket) {
         socket.on('connect', debugfunc('connect'));
-        socket.on('close', function(arg1) {
-            console.log(arg1);
+        socket.on('close', function() {
+            console.log("Connection closed with proxy client");
         });
         socket.on('data', function(data) {
             var message = {
@@ -28,25 +28,23 @@ module.exports = function(serverHost, serverPort, port) {
             if (proxyUrl) {
                 req.proxy(proxyUrl);
             }
-            
+
             req.send(message)
                 .end(function(err, res) {
                     if (err) {
                         socket.end('ERROR: Proxy failed');
                     }
                     var response = JSON.parse(res.text);
-                    console.log(res.text);
-                    console.log(new Buffer(response.content, 'base64').toString('ascii'));
                     socket.write(response.content.toString('ascii'));
                 });
         });
         socket.on('drain', debugfunc('drain'));
         socket.on('end', debugfunc('end'));
-        socket.on('error', debugfunc('error'));
+        socket.on('error', function (error) {
+            console.log(error);
+        });
         socket.on('lookup', debugfunc('lookup'));
         socket.on('timeout', debugfunc('timeout'));
-
-        socket.end("Hi");
     } );
 
     console.log("Proxy client up on port " + port + " connecting to " +
