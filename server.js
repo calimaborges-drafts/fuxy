@@ -34,6 +34,8 @@ module.exports = function(port) {
         client.on('timeout', debugfunc('timeout'));
 
         client.on('data', function(data) {
+            console.log('received data from proxy client');
+            console.log(data);
             var message = {
                 type: 'data',
                 host: 'test.carlosborg.es',
