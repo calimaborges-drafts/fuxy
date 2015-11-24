@@ -44,11 +44,13 @@ var portFromUrl = function(uri) {
 
 module.exports = function(serverHost, serverPort, port) {
     var server = net.createServer( function(socket) {
+        var i = 0;
         socket.on('connect', debugfunc('connect'));
         socket.on('close', function() {
             console.log("Connection closed with proxy client");
         });
         socket.on('data', function(data) {
+            console.log("Data " + i++);
             console.log(data.toString());
             var httpInfo = httpInfoFromString(data);
             var uri = httpInfo.uri;
