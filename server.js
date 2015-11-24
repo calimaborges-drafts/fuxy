@@ -1,6 +1,9 @@
 var express = require("express");
 var bodyParser = require('body-parser');
 var net = require('net');
+var parser = require('./shared/http-parsing');
+
+var proxyUrl = process.env.http_proxy;
 
 var debugfunc = function(name) {
     return function() {
@@ -15,6 +18,7 @@ module.exports = function(port) {
 
     server.use(function(req, res) {
         var client = new net.Socket();
+        var info = req.body;
 
         client.on('close', debugfunc('close'));
         client.on('connect', debugfunc('connect'));
@@ -31,22 +35,28 @@ module.exports = function(port) {
             console.log('received data from proxy client');
             var message = {
                 type: 'data',
-                host: 'test.carlosborg.es',
-                port: '80',
+                host: info.host,
+                port: info.port,
                 content: data.toString('base64')
             }
 
             res.end(JSON.stringify(message));
         });
 
-        var info = req.body;
-        console.log("Connecting to " + info.host + ":" + info.port);
-
         if (!info.host || !info.port) {
             return;
         }
 
-        client.connect(info.port, info.host, function() {
+        var connectPort = info.port;
+        var connectHost = info.host;
+
+        if (proxyUrl) {
+            connectHost = parser.hostFromUrl(proxyUrl);
+            connectPort = parser.portFromUrl(proxyUrl);
+        }
+
+        console.log("Connecting to " + connectHost + ":" + connectPort);
+        client.connect(connectPort, connectHost, function() {
             client.write(new Buffer(info.content, 'base64').toString('ascii'));
         });
     });
