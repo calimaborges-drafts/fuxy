@@ -22,7 +22,11 @@ module.exports = {
         uri = url.parse(uri);
 
         if(!uri.port) {
-            var protocol = uri.protocol.substring(0, uri.protocol.length - 1);
+            var protocol = 'connect';
+            if (uri.protocol) {
+                protocol = uri.protocol.substring(0, uri.protocol.length - 1);
+            }
+            
             switch (protocol) {
                 case 'http': return 80;
                 case 'https': return 443;
