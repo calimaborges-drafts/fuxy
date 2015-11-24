@@ -14,13 +14,7 @@ module.exports = function(port) {
     server.use(bodyParser.json());
 
     server.use(function(req, res) {
-        var info = req.body;
         var client = new net.Socket();
-        console.log("Connecting to " + info.host + ":" + info.port);
-
-        client.connect(info.port, info.host, function() {
-            client.write(new Buffer(info.content, 'base64').toString('ascii'));
-        });
 
         client.on('close', debugfunc('close'));
         client.on('connect', debugfunc('connect'));
@@ -43,6 +37,17 @@ module.exports = function(port) {
             }
 
             res.end(JSON.stringify(message));
+        });
+
+        var info = req.body;
+        console.log("Connecting to " + info.host + ":" + info.port);
+
+        if (!info.host || !info.port) {
+            return;
+        }
+
+        client.connect(info.port, info.host, function() {
+            client.write(new Buffer(info.content, 'base64').toString('ascii'));
         });
     });
 

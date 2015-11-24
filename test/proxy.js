@@ -11,15 +11,20 @@ describe('proxy', function() {
     var proxyClient;
     var proxyClientPort;
     var proxyServerPort;
-    var host;
+    var proxyClientHost;
+    var proxyClientHost
 
     before(function() {
         proxyServerPort = 8887;
         proxyClientPort = 8889;
-        host = "127.0.0.1";
+        proxyClientHost = "127.0.0.1";
+        proxyServerHost = "127.0.0.1";
+
+        // proxyServerPort = 80; //heroku
+        // proxyServerHost = "kali-xypro.herokuapp.com"; //heroku
 
         proxyServer = server(proxyServerPort);
-        proxyClient = client(host, proxyServerPort, proxyClientPort);
+        proxyClient = client(proxyServerHost, proxyServerPort, proxyClientPort);
     });
 
     after(function() {
@@ -29,7 +34,7 @@ describe('proxy', function() {
 
     it('should redirect HTTP request to proxy server', function(done) {
         request.get("http://test.carlosborg.es/")
-            .proxy("http://" + host + ":" + proxyClientPort)
+            .proxy("http://" + proxyClientHost + ":" + proxyClientPort)
             .end(function(err, res) {
                 assert.ifError(err);
                 assert.equal(res.status, status.OK);
@@ -41,7 +46,7 @@ describe('proxy', function() {
 
     // it('should redirect HTTPS request to proxy server', function(done) {
     //     request.get("https://test.carlosborg.es/")
-    //         .proxy("http://" + host + ":" + proxyClientPort)
+    //         .proxy("http://" + proxyClientHost + ":" + proxyClientPort)
     //         .end(function(err, res) {
     //             assert.ifError(err);
     //             assert.equal(res.status, status.OK);
