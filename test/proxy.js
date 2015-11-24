@@ -44,6 +44,19 @@ describe('proxy', function() {
             });
     });
 
+    it('should redirect large HTTP request to proxy server', function(done) {
+        request.get("http://carlosborg.es/carlos-borges-escrita-baixo-logo.svg")
+            .proxy("http://" + proxyClientHost + ":" + proxyClientPort)
+            .end(function(err, res) {
+                assert.ifError(err);
+                console.log(res.text);
+                // assert.equal(res.status, status.OK);
+
+                // assert.deepEqual( { status: 'active' }, result );
+                done();
+            });
+    });
+
     // it('should redirect HTTPS request to proxy server', function(done) {
     //     request.get("https://test.carlosborg.es/")
     //         .proxy("http://" + proxyClientHost + ":" + proxyClientPort)
