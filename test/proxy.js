@@ -1,5 +1,5 @@
-var server = require("../server");
-var client = require("../client");
+var server = require("../server/index");
+var client = require("../client/index");
 var request = require('superagent');
 var assert = require('assert');
 var status = require('http-status');

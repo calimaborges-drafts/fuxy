@@ -7,7 +7,7 @@ if (process.argv.length > 2) {
 }
 
 if (type == 'client') {
-    require("./client")("kali-xypro.herokuapp.com", 80, 8888);
+    require("./client/index")("localhost", 8889, 8888);
 } else {
-    require("./server")(process.env.PORT || 8889);
+    require("./server/index")(process.env.PORT || 8889);
 }
