@@ -25,18 +25,19 @@ var createTunnel = function(serverHost, serverPort, data, socket) {
     var port = parser.portFromUrl(uri);
 
     var tunnel = new net.Socket();
-    if (!httpProxy) {
-        console.error("[CLIENT] Proxy na variável de ambiente HTTP_PROXY é obrigatório.");
-        process.exit();
-    }
 
-    var connectHost = parser.hostFromUrl(httpProxy);
-    var connectPort = parser.portFromUrl(httpProxy);
+    var connectHost = serverHost;
+    var connectPort = serverPort;
 
     debug.attachListeners(tunnel, '[CLIENT-TUNNEL]', ['connect', 'close', 'drain', 'end', 'lookup', 'timeout', 'data']);
     tunnel.on('error', function(err) {
         console.error("[CLIENT-TUNNEL] " + err.toString());
     });
+
+    if (!httpProxy) {
+        connectPort = parser.portFromUrl(httpProxy);
+        connectHost = parser.hostFromUrl(httpProxy);
+    }
 
     tunnel.connect(connectPort, connectHost, function() {
         debug.d("[CLIENT-TUNNEL] -> " + connectHost + ":" + connectPort + " -> " + serverHost + ":" + serverPort + " -> " + host + ":" + port );
