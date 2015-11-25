@@ -5,12 +5,14 @@ var net = require('net');
 
 
 /** Local Dependencies**/
-var debug = require('../shared/debug-func');
+var Debug = require('../shared/Debug');
 var parser = require('../shared/http-parsing');
 
 /** Global Variables **/
+var debug = new Debug(false);
 var httpProxy = process.env.http_proxy;
 var tunnels = [];
+
 
 var createTunnel = function(serverHost, serverPort, host, port, data, socket) {
     var tunnel = new net.Socket();
@@ -28,10 +30,10 @@ var createTunnel = function(serverHost, serverPort, host, port, data, socket) {
     });
 
     tunnel.connect(connectPort, connectHost, function() {
-        console.log("[CLIENT-TUNNEL] -> " + connectHost + ":" + connectPort + " -> " + serverHost + ":" + serverPort + " -> " + host + ":" + port );
-        console.log("[CLIENT-TUNNEL] ---- Start Data ---->");
-        console.log(data.toString());
-        console.log("[CLIENT-TUNNEL] ---- End Data ---->");
+        debug.d("[CLIENT-TUNNEL] -> " + connectHost + ":" + connectPort + " -> " + serverHost + ":" + serverPort + " -> " + host + ":" + port );
+        debug.d("[CLIENT-TUNNEL] ---- Start Data ---->");
+        debug.d(data.toString());
+        debug.d("[CLIENT-TUNNEL] ---- End Data ---->");
         // tunnel.write(new Buffer(data, 'base64').toString('ascii'));
         tunnel.write("POST " + serverHost + ":" + serverPort + " HTTP/1.0\r\n");
         tunnel.write("Host: " + serverHost + ":" + serverPort + "\r\n");
@@ -40,9 +42,9 @@ var createTunnel = function(serverHost, serverPort, host, port, data, socket) {
     });
 
     tunnel.on('data', function(data) {
-        console.log("[CLIENT-TUNNEL] <---- Start Data ----");
-        console.log(data.toString());
-        console.log("[CLIENT-TUNNEL] <---- End Data ----");
+        debug.d("[CLIENT-TUNNEL] <---- Start Data ----");
+        debug.d(data.toString());
+        debug.d("[CLIENT-TUNNEL] <---- End Data ----");
         socket.write(data);
     });
 
@@ -65,9 +67,9 @@ var createServer = function(serverHost, serverPort, clientPort) {
             var port = parser.portFromUrl(uri);
             var tunnel = createTunnel(serverHost, serverPort, host, port, data, socket);
 
-            console.log("[CLIENT] <---- Start Data ----");
-            console.log(data.toString());
-            console.log("[CLIENT] <---- End Data ----");
+            debug.d("[CLIENT] <---- Start Data ----");
+            debug.d(data.toString());
+            debug.d("[CLIENT] <---- End Data ----");
         });
     });
 
@@ -75,6 +77,6 @@ var createServer = function(serverHost, serverPort, clientPort) {
 };
 
 module.exports = function(serverHost, serverPort, clientPort) {
-    console.log("[CLIENT] " + clientPort + " -> " + serverHost + ":" + serverPort);
+    debug.d("[CLIENT] " + clientPort + " -> " + serverHost + ":" + serverPort);
     return createServer(serverHost, serverPort, clientPort);
 };

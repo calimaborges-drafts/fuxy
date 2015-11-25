@@ -49,23 +49,20 @@ describe('proxy', function() {
             .proxy("http://" + proxyClientHost + ":" + proxyClientPort)
             .end(function(err, res) {
                 assert.ifError(err);
-                console.log(res.text);
-                // assert.equal(res.status, status.OK);
-
-                // assert.deepEqual( { status: 'active' }, result );
+                assert.equal(res.body.length, 6959);
                 done();
             });
     });
 
-    // it('should redirect HTTPS request to proxy server', function(done) {
-    //     request.get("https://test.carlosborg.es/")
-    //         .proxy("http://" + proxyClientHost + ":" + proxyClientPort)
-    //         .end(function(err, res) {
-    //             assert.ifError(err);
-    //             assert.equal(res.status, status.OK);
-    //             var result = JSON.parse(res.text);
-    //             assert.deepEqual( { status: 'active' }, result );
-    //             done();
-    //         });
-    // });
+    it('should redirect HTTPS request to proxy server', function(done) {
+        request.get("https://test.carlosborg.es/")
+            .proxy("http://" + proxyClientHost + ":" + proxyClientPort)
+            .end(function(err, res) {
+                assert.ifError(err);
+                assert.equal(res.status, status.OK);
+                var result = JSON.parse(res.text);
+                assert.deepEqual( { status: 'active' }, result );
+                done();
+            });
+    });
 });

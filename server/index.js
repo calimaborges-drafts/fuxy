@@ -1,7 +1,9 @@
 var net = require('net');
 var parser = require('../shared/http-parsing');
-var debug = require('../shared/debug-func');
+var Debug = require('../shared/Debug');
 
+var debug = new Debug(false);
+var verbose = true;
 var httpProxy = process.env.http_proxy;
 var clients = [];
 
@@ -16,17 +18,18 @@ var createTunnel = function(host, port, data, socket) {
     });
 
     tunnel.connect(connectPort, connectHost, function() {
-        console.log("[SERVER-TUNNEL] -> " + connectHost + ":" + connectPort + " -> " + host + ":" + port );
-        console.log("[SERVER-TUNNEL] ---- Start Data ---->");
-        console.log(data.toString());
-        console.log("[SERVER-TUNNEL] ---- End Data ---->");
+        debug.d("*********************** FUNCIONOU *************************");
+        debug.d("[SERVER-TUNNEL] -> " + connectHost + ":" + connectPort + " -> " + host + ":" + port );
+        debug.d("[SERVER-TUNNEL] ---- Start Data ---->");
+        debug.d(data.toString());
+        debug.d("[SERVER-TUNNEL] ---- End Data ---->");
         tunnel.write(data);
     });
 
     tunnel.on('data', function(data) {
-        console.log("[SERVER-TUNNEL] <---- Start Data ----");
-        console.log(data.toString());
-        console.log("[SERVER-TUNNEL] <---- End Data ----");
+        debug.d("[SERVER-TUNNEL] <---- Start Data ----");
+        debug.d(data.toString());
+        debug.d("[SERVER-TUNNEL] <---- End Data ----");
         socket.write(data);
     });
 
@@ -52,9 +55,9 @@ var createServer = function(serverPort) {
                 socket.write("\r\n\r\n");
             }
 
-            console.log("[SERVER] <---- Start Data ----");
-            console.log(data.toString());
-            console.log("[SERVER] <---- End Data ----");
+            debug.d("[SERVER] <---- Start Data ----");
+            debug.d(data.toString());
+            debug.d("[SERVER] <---- End Data ----");
 
             createTunnel(json.host, json.port, new Buffer(json.chunk, 'base64').toString('ascii'), socket);
         });
@@ -64,6 +67,6 @@ var createServer = function(serverPort) {
 };
 
 module.exports = function(serverPort) {
-    console.log("[SERVER] -> " + serverPort);
+    debug.d("[SERVER] -> " + serverPort);
     return createServer(serverPort);
 };
