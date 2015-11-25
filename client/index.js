@@ -34,7 +34,7 @@ var createTunnel = function(serverHost, serverPort, data, socket) {
         console.error("[CLIENT-TUNNEL] " + err.toString());
     });
 
-    if (!httpProxy) {
+    if (httpProxy) {
         connectPort = parser.portFromUrl(httpProxy);
         connectHost = parser.hostFromUrl(httpProxy);
     }
