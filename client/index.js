@@ -9,12 +9,21 @@ var Debug = require('../shared/Debug');
 var parser = require('../shared/http-parsing');
 
 /** Global Variables **/
-var debug = new Debug(false);
+var debug = new Debug(true);
 var httpProxy = process.env.http_proxy;
-var tunnels = [];
 
+var createTunnel = function(serverHost, serverPort, data, socket) {
+    debug.d("[CLIENT] Creating tunnel for socket");
+    var httpInfo = parser.httpInfoFromString(data);
+    var uri = httpInfo.uri;
 
-var createTunnel = function(serverHost, serverPort, host, port, data, socket) {
+    if (httpInfo.method == 'CONNECT') {
+        uri = "connect://" + uri;
+    }
+
+    var host = parser.hostFromUrl(uri);
+    var port = parser.portFromUrl(uri);
+
     var tunnel = new net.Socket();
     if (!httpProxy) {
         console.error("[CLIENT] Proxy na variável de ambiente HTTP_PROXY é obrigatório.");
@@ -34,7 +43,7 @@ var createTunnel = function(serverHost, serverPort, host, port, data, socket) {
         debug.d("[CLIENT-TUNNEL] ---- Start Data ---->");
         debug.d(data.toString());
         debug.d("[CLIENT-TUNNEL] ---- End Data ---->");
-        // tunnel.write(new Buffer(data, 'base64').toString('ascii'));
+
         tunnel.write("POST " + serverHost + ":" + serverPort + " HTTP/1.0\r\n");
         tunnel.write("Host: " + serverHost + ":" + serverPort + "\r\n");
         tunnel.write(JSON.stringify({ host: host, port: port, chunk: data.toString('base64')}));
@@ -55,17 +64,16 @@ var createServer = function(serverHost, serverPort, clientPort) {
     var server = net.createServer( function(socket) {
         debug.attachListeners(socket, '[CLIENT]', ['connect', 'close', 'drain', 'end', 'error', 'lookup', 'timeout', 'data']);
 
+        socket.on('error', function(err) {
+            console.error("[CLIENT] " + err.toString());
+        });
+
         socket.on('data', function(data) {
-            var httpInfo = parser.httpInfoFromString(data);
-            var uri = httpInfo.uri;
-
-            if (httpInfo.method == 'CONNECT') {
-                uri = "connect://" + uri;
+            if (!socket.tunnel) {
+                socket.tunnel = createTunnel(serverHost, serverPort, data, socket);
+            } else {
+                socket.tunnel.write(data);
             }
-
-            var host = parser.hostFromUrl(uri);
-            var port = parser.portFromUrl(uri);
-            var tunnel = createTunnel(serverHost, serverPort, host, port, data, socket);
 
             debug.d("[CLIENT] <---- Start Data ----");
             debug.d(data.toString());
