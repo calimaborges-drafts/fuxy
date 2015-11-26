@@ -45,7 +45,7 @@ var createTunnel = function(serverHost, serverPort, data, socket) {
         debug.d(data.toString());
         debug.d("[CLIENT-TUNNEL] ---- End Data ---->");
 
-        tunnel.write("POST " + serverHost + ":" + serverPort + " HTTP/1.0\r\n");
+        tunnel.write("POST http://" + serverHost + ":" + serverPort + " HTTP/1.0\r\n");
         tunnel.write("Host: " + serverHost + ":" + serverPort + "\r\n");
         tunnel.write(JSON.stringify({ host: host, port: port, chunk: data.toString('base64')}));
         tunnel.write("\r\n\r\n");
