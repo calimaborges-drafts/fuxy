@@ -54,15 +54,15 @@ describe('proxy', function() {
             });
     });
 
-    // it('should redirect HTTPS request to proxy server', function(done) {
-    //     request.get("https://carlosborg.es/")
-    //         .proxy("http://" + proxyClientHost + ":" + proxyClientPort)
-    //         .end(function(err, res) {
-    //             assert.ifError(err);
-    //             assert.equal(res.status, status.OK);
-    //             var result = JSON.parse(res.text);
-    //             assert.deepEqual( { status: 'active' }, result );
-    //             done();
-    //         });
-    // });
+    it('should redirect HTTPS request to proxy server', function(done) {
+        request.get("https://carlosborg.es/test.html")
+            .proxy("http://" + proxyClientHost + ":" + proxyClientPort)
+            .end(function(err, res) {
+                assert.ifError(err);
+                assert.equal(res.status, status.OK);
+                var result = JSON.parse(res.text);
+                assert.deepEqual( { status: 'active' }, result );
+                done();
+            });
+    });
 });

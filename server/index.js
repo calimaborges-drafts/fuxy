@@ -27,25 +27,17 @@ var createTunnel = function(data, socket) {
     // Os parametros podem ser bem fixos conforme os splits abaixo pois a
     // conexão é estabelecida pelo cliente do nosso proxy e portanto temos
     // completo controle do que trafega.
+    var httpInfo = parser.httpInfoFromString(data);
+    var uri = httpInfo.uri;
 
-    var splitedData = data.toString().split("\r\n");
-
-    if (splitedData.length < 3) {
-        socket.write("HTTP/1.0 400 Bad Request");
-        socket.write("\r\n\r\n");
+    if (httpInfo.method == 'CONNECT') {
+        uri = "connect://" + uri;
     }
 
-    var json = JSON.parse(splitedData[2]);
-
-    if (!json) {
-        socket.write("HTTP/1.0 400 Bad Request");
-        socket.write("\r\n\r\n");
-    }
+    var host = parser.hostFromUrl(uri);
+    var port = parser.portFromUrl(uri);
 
     var tunnel = new net.Socket();
-    var host = json.host;
-    var port = json.port;
-    var data = new Buffer(json.chunk, 'base64').toString('ascii');
     var connectHost = host;
     var connectPort = port;
 
@@ -63,13 +55,23 @@ var createTunnel = function(data, socket) {
         console.error("[SERVER-TUNNEL] " + err.toString());
     });
 
+    tunnel.on('end', function() {
+        socket.end();
+    });
+
     // Estabelece conexão com servidor destino e envia primeiro 'chunk'
     tunnel.connect(connectPort, connectHost, function() {
+        if (httpInfo.method == 'CONNECT') {
+            data = "HTTP/1.0 200 Connection established\r\n\r\n";
+            socket.write(data);
+        } else {
+            tunnel.write(data);
+        }
+
         debug.d("[SERVER-TUNNEL] -> " + connectHost + ":" + connectPort + " -> " + host + ":" + port );
         debug.d("[SERVER-TUNNEL] ---- Start Data ---->");
         debug.d(data.toString());
         debug.d("[SERVER-TUNNEL] ---- End Data ---->");
-        tunnel.write(data);
     });
 
     // Quando receber um dado encaminha para o socket que se comunica com o

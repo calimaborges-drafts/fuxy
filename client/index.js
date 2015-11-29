@@ -14,15 +14,6 @@ var httpProxy = process.env.http_proxy;
 
 var createTunnel = function(serverHost, serverPort, data, socket) {
     debug.d("[CLIENT] Creating tunnel for socket");
-    var httpInfo = parser.httpInfoFromString(data);
-    var uri = httpInfo.uri;
-
-    if (httpInfo.method == 'CONNECT') {
-        uri = "connect://" + uri;
-    }
-
-    var host = parser.hostFromUrl(uri);
-    var port = parser.portFromUrl(uri);
 
     var tunnel = new net.Socket();
 
@@ -40,15 +31,19 @@ var createTunnel = function(serverHost, serverPort, data, socket) {
     }
 
     tunnel.connect(connectPort, connectHost, function() {
-        debug.d("[CLIENT-TUNNEL] -> " + connectHost + ":" + connectPort + " -> " + serverHost + ":" + serverPort + " -> " + host + ":" + port );
+        debug.d("[CLIENT-TUNNEL] -> " + connectHost + ":" + connectPort + " -> " + serverHost + ":" + serverPort);
         debug.d("[CLIENT-TUNNEL] ---- Start Data ---->");
         debug.d(data.toString());
         debug.d("[CLIENT-TUNNEL] ---- End Data ---->");
 
-        tunnel.write("POST http://" + serverHost + ":" + serverPort + " HTTP/1.0\r\n");
-        tunnel.write("Host: " + serverHost + ":" + serverPort + "\r\n");
-        tunnel.write(JSON.stringify({ host: host, port: port, chunk: data.toString('base64')}));
-        tunnel.write("\r\n\r\n");
+        // tunnel.write("POST http://" + serverHost + ":" + serverPort + " HTTP/1.0\r\n");
+        // tunnel.write("Host: " + serverHost + ":" + serverPort + "\r\n");
+        tunnel.write(data);
+        // tunnel.write("\r\n\r\n");
+    });
+
+    tunnel.on('end', function() {
+        socket.end();
     });
 
     tunnel.on('data', function(data) {
