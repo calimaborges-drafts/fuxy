@@ -3,6 +3,7 @@ var client = require("../client/index");
 var request = require('superagent');
 var assert = require('assert');
 var status = require('http-status');
+var base64 = require('../shared/base64');
 
 require('superagent-proxy')(request);
 
@@ -30,6 +31,17 @@ describe('proxy', function() {
     after(function() {
         proxyServer.close();
         proxyClient.close();
+    });
+
+    it('should encode and decode base64', function(done) {
+        var text = new Buffer('First text');
+        var encoded = base64.encode(text);
+        var decoded = base64.decode(text);
+
+        assert.equal(text.toString(), decoded.toString());
+        assert.notEqual(text.toString(), encoded.toString());
+
+        done();
     });
 
     it('should redirect HTTP request to proxy server', function(done) {

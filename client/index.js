@@ -3,10 +3,10 @@ var net = require('net');
 
 /** NPM Dependencies **/
 
-
 /** Local Dependencies**/
 var Debug = require('../shared/Debug');
 var parser = require('../shared/http-parsing');
+var base64 = require('../shared/base64');
 
 /** Global Variables **/
 var debug = new Debug(true);
@@ -65,6 +65,7 @@ var createServer = function(serverHost, serverPort, clientPort) {
         });
 
         socket.on('data', function(data) {
+            data = base64.encode(data);
             if (!socket.tunnel) {
                 socket.tunnel = createTunnel(serverHost, serverPort, data, socket);
             } else {

@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "base64-js": "0.0.8",
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
     "superagent": "^1.4.0"

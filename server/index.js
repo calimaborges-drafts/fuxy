@@ -6,6 +6,7 @@ var net = require('net');
 /** Shared dependencies **/
 var parser = require('../shared/http-parsing');
 var Debug = require('../shared/Debug');
+var base64 = require('../shared/base64');
 
 /** Global Variables **/
 var debug = new Debug(true);
@@ -92,6 +93,7 @@ var createServer = function(serverPort) {
         debug.attachListeners(socket, '[SERVER]', ['connect', 'close', 'drain', 'end', 'error', 'lookup', 'timeout', 'data']);
 
         socket.on('data', function(data) {
+            data = base64.decode(new Buffer(data.toString(), 'base64'));
             if (!socket.tunnel) {
                 socket.tunnel = createTunnel(data, socket);
             } else {
