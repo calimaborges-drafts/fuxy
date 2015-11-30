@@ -93,6 +93,12 @@ var createServer = function(serverPort) {
         debug.attachListeners(socket, '[SERVER]', ['connect', 'close', 'drain', 'end', 'error', 'lookup', 'timeout', 'data']);
 
         socket.on('data', function(data) {
+            console.log(data.toString());
+            console.log(data.toString().split("\r\n"));
+            splitted = data.toString().split("\r\n");
+            data = splitted[3];
+            data = JSON.parse(data).data;
+            console.log(data);
             data = base64.decode(new Buffer(data.toString(), 'base64'));
             if (!socket.tunnel) {
                 socket.tunnel = createTunnel(data, socket);

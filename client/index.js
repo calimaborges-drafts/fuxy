@@ -36,10 +36,7 @@ var createTunnel = function(serverHost, serverPort, data, socket) {
         debug.d(data.toString());
         debug.d("[CLIENT-TUNNEL] ---- End Data ---->");
 
-        // tunnel.write("POST http://" + serverHost + ":" + serverPort + " HTTP/1.0\r\n");
-        // tunnel.write("Host: " + serverHost + ":" + serverPort + "\r\n");
         tunnel.write(data);
-        // tunnel.write("\r\n\r\n");
     });
 
     tunnel.on('end', function() {
@@ -66,6 +63,11 @@ var createServer = function(serverHost, serverPort, clientPort) {
 
         socket.on('data', function(data) {
             data = base64.encode(data);
+            data = "POST http://" + serverHost + ":" + serverPort + " HTTP/1.0\r\n" +
+                   "Host: " + serverHost + ":" + serverPort + "\r\n" +
+                   "Content-Type: application/json\r\n" +
+                   "{ \"data\": \"" + data + "\"}" +
+                   "\r\n\r\n";
             if (!socket.tunnel) {
                 socket.tunnel = createTunnel(serverHost, serverPort, data, socket);
             } else {
