@@ -1,9 +1,9 @@
-var server = require("../server/index");
-var client = require("../client/index");
+var server = require("./index");
+var client = require("./index");
 var request = require('superagent');
 var assert = require('assert');
 var status = require('http-status');
-var base64 = require('../shared/base64');
+var base64 = require('./base64');
 
 require('superagent-proxy')(request);
 
