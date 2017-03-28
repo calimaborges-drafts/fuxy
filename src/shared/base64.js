@@ -1,9 +1,2 @@
-module.exports = {
-    encode: function(data) {
-        return new Buffer(data, 'binary').toString('base64');
-    },
-
-    decode: function(data) {
-        return new Buffer(data, 'base64');
-    }
-};
+export const encode = (data) => new Buffer(data, 'binary').toString('base64');
+export const decode = (data) => new Buffer(data, 'base64');

@@ -1,12 +1,12 @@
 import net from 'net';
 import { infoFromString, hostFromUrl, portFromUrl } from '../shared/http-parsing';
 import Debug from '../shared/Debug';
-import base64 from '../shared/base64';
+import { decode } from '../shared/base64';
 
 const debug = new Debug(true);
 const httpProxy = process.env.http_proxy;
 
-const createTunnel = function(data, socket) {
+const createTunnel = (data, socket) => {
     debug.d("[SERVER] Creating socket tunnel");
 
     const httpInfo = infoFromString(data);
@@ -16,12 +16,12 @@ const createTunnel = function(data, socket) {
         uri = "connect://" + uri;
     }
 
-    var host = hostFromUrl(uri);
-    var port = portFromUrl(uri);
+    const host = hostFromUrl(uri);
+    const port = portFromUrl(uri);
 
-    var tunnel = new net.Socket();
-    var connectHost = host;
-    var connectPort = port;
+    const  tunnel = new net.Socket();
+    let    connectHost = host;
+    let    connectPort = port;
 
     // Caso servidor necessite de proxy
     if (httpProxy) {
@@ -69,19 +69,19 @@ const createTunnel = function(data, socket) {
     return tunnel;
 };
 
-var createServer = function(serverPort) {
-    var splitted = null;
-    var server = net.createServer( function(socket) {
+const createServer = (serverPort) => {
+    let splitted = null;
+    const server = net.createServer( (socket) => {
         debug.attachListeners(socket, '[SERVER]', ['connect', 'close', 'drain', 'end', 'error', 'lookup', 'timeout', 'data']);
 
-        socket.on('data', function(data) {
+        socket.on('data', (data) => {
             console.log(data.toString());
             console.log(data.toString().split("\r\n"));
             splitted = data.toString().split("\r\n");
             data = splitted[3];
             data = JSON.parse(data).data;
             console.log(data);
-            data = base64.decode(new Buffer(data.toString(), 'base64'));
+            data = decode(new Buffer(data.toString(), 'base64'));
             if (!socket.tunnel) {
                 socket.tunnel = createTunnel(data, socket);
             } else {
