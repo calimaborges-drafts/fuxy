@@ -1,24 +1,18 @@
-/** Core Dependencies **/
-var net = require('net');
+import net from 'net';
+import Debug from '../shared/Debug';
+import { portFromUrl, hostFromUrl } from '../shared/http-parsing';
+import { encode } from '../shared/base64';
 
-/** NPM Dependencies **/
+const debug = new Debug(process.env.NODE_ENV === 'development');
+const httpProxy = process.env.http_proxy;
 
-/** Local Dependencies**/
-var Debug = require('../shared/Debug');
-var parser = require('../shared/http-parsing');
-var base64 = require('../shared/base64');
-
-/** Global Variables **/
-var debug = new Debug(true);
-var httpProxy = process.env.http_proxy;
-
-var createTunnel = function(serverHost, serverPort, data, socket) {
+const createTunnel = (serverHost, serverPort, data, socket) => {
     debug.d("[CLIENT] Creating tunnel for socket");
 
-    var tunnel = new net.Socket();
+    const tunnel = new net.Socket();
 
-    var connectHost = serverHost;
-    var connectPort = serverPort;
+    let connectHost = serverHost;
+    let connectPort = serverPort;
 
     debug.attachListeners(tunnel, '[CLIENT-TUNNEL]', ['connect', 'close', 'drain', 'end', 'lookup', 'timeout', 'data']);
     tunnel.on('error', function(err) {
@@ -26,8 +20,8 @@ var createTunnel = function(serverHost, serverPort, data, socket) {
     });
 
     if (httpProxy) {
-        connectPort = parser.portFromUrl(httpProxy);
-        connectHost = parser.hostFromUrl(httpProxy);
+        connectPort = portFromUrl(httpProxy);
+        connectHost = hostFromUrl(httpProxy);
     }
 
     tunnel.connect(connectPort, connectHost, function() {
@@ -53,8 +47,8 @@ var createTunnel = function(serverHost, serverPort, data, socket) {
     return tunnel;
 };
 
-var createServer = function(serverHost, serverPort, clientPort) {
-    var server = net.createServer( function(socket) {
+const createServer = (serverHost, serverPort, clientPort) => {
+    const server = net.createServer( function(socket) {
         debug.attachListeners(socket, '[CLIENT]', ['connect', 'close', 'drain', 'end', 'error', 'lookup', 'timeout', 'data']);
 
         socket.on('error', function(err) {
@@ -62,7 +56,7 @@ var createServer = function(serverHost, serverPort, clientPort) {
         });
 
         socket.on('data', function(data) {
-            data = base64.encode(data);
+            data = encode(data);
             data = "POST http://" + serverHost + ":" + serverPort + " HTTP/1.0\r\n" +
                    "Host: " + serverHost + ":" + serverPort + "\r\n" +
                    "Content-Type: application/json\r\n" +
@@ -83,7 +77,7 @@ var createServer = function(serverHost, serverPort, clientPort) {
     return server.listen(clientPort);
 };
 
-module.exports = function(serverHost, serverPort, clientPort) {
+module.exports = (serverHost, serverPort, clientPort) => {
     debug.d("[CLIENT] " + clientPort + " -> " + serverHost + ":" + serverPort);
     return createServer(serverHost, serverPort, clientPort);
 };

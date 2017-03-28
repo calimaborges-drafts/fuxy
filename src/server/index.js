@@ -3,7 +3,7 @@ import { infoFromString, hostFromUrl, portFromUrl } from '../shared/http-parsing
 import Debug from '../shared/Debug';
 import { decode } from '../shared/base64';
 
-const debug = new Debug(true);
+const debug = new Debug(process.env.NODE_ENV === 'development');
 const httpProxy = process.env.http_proxy;
 
 const createTunnel = (data, socket) => {
@@ -75,12 +75,12 @@ const createServer = (serverPort) => {
         debug.attachListeners(socket, '[SERVER]', ['connect', 'close', 'drain', 'end', 'error', 'lookup', 'timeout', 'data']);
 
         socket.on('data', (data) => {
-            console.log(data.toString());
-            console.log(data.toString().split("\r\n"));
+            debug.d(data.toString());
+            debug.d(data.toString().split("\r\n"));
             splitted = data.toString().split("\r\n");
             data = splitted[3];
             data = JSON.parse(data).data;
-            console.log(data);
+            debug.d(data);
             data = decode(new Buffer(data.toString(), 'base64'));
             if (!socket.tunnel) {
                 socket.tunnel = createTunnel(data, socket);
