@@ -1,6 +1,6 @@
 import base64 from '../src/shared/base64';
 
-it('should encode and decode base64', function() {
+test('should encode and decode base64', function() {
     const text = new Buffer('First text');
     const encoded = base64.encode(text);
     const decoded = base64.decode(text);

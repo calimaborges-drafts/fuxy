@@ -1,5 +1,5 @@
 import net from 'net';
-import parser from '../shared/http-parsing';
+import { infoFromString, hostFromUrl, portFromUrl } from '../shared/http-parsing';
 import Debug from '../shared/Debug';
 import base64 from '../shared/base64';
 
@@ -9,28 +9,15 @@ const httpProxy = process.env.http_proxy;
 const createTunnel = function(data, socket) {
     debug.d("[SERVER] Creating socket tunnel");
 
-    // O servidor espera o primeiro pacote no formato similar ao exemplo:
-    // POST / HTTP/1.0
-    // Host: 127.0.0.1:8887
-    // {
-    //    "host": "test.carlosborg.es",
-    //    "port":"443",
-    //    "chunk":"Q09OTkVDVCB0ZXN0LmNhcmxvc2JvcmcuZXM6NDQzIEhUVFAvMS4xDQpIb3N0
-    //             OiB0ZXN0LmNhcmxvc2JvcmcuZXM6NDQzDQpDb25uZWN0aW9uOiBjbG9zZQ0K
-    //             DQo="
-    // }
-    // Os parametros podem ser bem fixos conforme os splits abaixo pois a
-    // conexão é estabelecida pelo cliente do nosso proxy e portanto temos
-    // completo controle do que trafega.
-    var httpInfo = parser.httpInfoFromString(data);
-    var uri = httpInfo.uri;
+    const httpInfo = infoFromString(data);
+    let uri = httpInfo.uri;
 
-    if (httpInfo.method == 'CONNECT') {
+    if (httpInfo.method === 'CONNECT') {
         uri = "connect://" + uri;
     }
 
-    var host = parser.hostFromUrl(uri);
-    var port = parser.portFromUrl(uri);
+    var host = hostFromUrl(uri);
+    var port = portFromUrl(uri);
 
     var tunnel = new net.Socket();
     var connectHost = host;
@@ -38,8 +25,8 @@ const createTunnel = function(data, socket) {
 
     // Caso servidor necessite de proxy
     if (httpProxy) {
-        connectHost = parser.hostFromUrl(httpProxy);
-        connectPort = parser.portFromUrl(httpProxy);
+        connectHost = hostFromUrl(httpProxy);
+        connectPort = portFromUrl(httpProxy);
     }
 
     // Captura eventos não tratados para debug
@@ -56,7 +43,7 @@ const createTunnel = function(data, socket) {
 
     // Estabelece conexão com servidor destino e envia primeiro 'chunk'
     tunnel.connect(connectPort, connectHost, function() {
-        if (httpInfo.method == 'CONNECT') {
+        if (httpInfo.method === 'CONNECT') {
             data = "HTTP/1.0 200 Connection established\r\n\r\n";
             socket.write(data);
         } else {
