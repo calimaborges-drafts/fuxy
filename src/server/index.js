@@ -1,18 +1,12 @@
-/** Core dependencies **/
-var net = require('net');
+import net from 'net';
+import parser from '../shared/http-parsing';
+import Debug from '../shared/Debug';
+import base64 from '../shared/base64';
 
-/** NPM Dependencies **/
+const debug = new Debug(true);
+const httpProxy = process.env.http_proxy;
 
-/** Shared dependencies **/
-var parser = require('../shared/http-parsing');
-var Debug = require('../shared/Debug');
-var base64 = require('../shared/base64');
-
-/** Global Variables **/
-var debug = new Debug(true);
-var httpProxy = process.env.http_proxy;
-
-var createTunnel = function(data, socket) {
+const createTunnel = function(data, socket) {
     debug.d("[SERVER] Creating socket tunnel");
 
     // O servidor espera o primeiro pacote no formato similar ao exemplo:
@@ -89,6 +83,7 @@ var createTunnel = function(data, socket) {
 };
 
 var createServer = function(serverPort) {
+    var splitted = null;
     var server = net.createServer( function(socket) {
         debug.attachListeners(socket, '[SERVER]', ['connect', 'close', 'drain', 'end', 'error', 'lookup', 'timeout', 'data']);
 
@@ -115,7 +110,7 @@ var createServer = function(serverPort) {
     return server.listen(serverPort);
 };
 
-module.exports = function(serverPort) {
-    debug.d("[SERVER] -> " + serverPort);
+export default (serverPort) => {
+    debug.d(`[SERVER] -> ${serverPort}`);
     return createServer(serverPort);
 };
