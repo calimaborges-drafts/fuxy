@@ -1,25 +1,10 @@
 {
-  "name": "proxy",
+  "name": "fuxy",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "serve": "nodemon index.js",
-    "test": "mocha"
-  },
-  "author": "",
-  "license": "ISC",
+  "repository": "https://github.com/calimaborges/fuxy.git",
+  "license": "MIT",
   "dependencies": {
-    "base64-js": "0.0.8",
-    "body-parser": "^1.14.1",
-    "express": "^4.13.3",
-    "superagent": "^1.4.0"
-  },
-  "devDependencies": {
-    "nodemon": "^1.8.1",
-    "http-status": "^0.2.0",
-    "mocha": "^2.3.4",
-    "superagent-proxy": "^1.0.0"
+    "jest": "^21.2.1"
   }
 }
