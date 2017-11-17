@@ -4,7 +4,14 @@
   "main": "index.js",
   "repository": "https://github.com/calimaborges/fuxy.git",
   "license": "MIT",
-  "dependencies": {
-    "jest": "^21.2.1"
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "http-status": "^1.0.1",
+    "jest": "^21.2.1",
+    "superagent": "^3.8.1",
+    "superagent-proxy": "^1.0.2"
   }
 }
