@@ -20,7 +20,7 @@ describe("fuxy proxy", () => {
   it("should work for simple GET request", async () =>
     new Promise((resolve, reject) => {
       request
-        .get("https://httpbin.org/get")
+        .get("http://httpbin.org/get")
         .proxy(proxyClient.getUrl())
         .end((err, response) => {
           if (err) reject(err);
